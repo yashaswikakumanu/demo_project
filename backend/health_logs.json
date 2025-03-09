@@ -1,0 +1,21 @@
+{
+    "user_123": [
+        {
+            "food": "Oatmeal and banana",
+            "steps": 5000,
+            "note": "User daily log"
+        },
+        {
+            "food": "Grilled chicken salad",
+            "steps": 8000,
+            "note": "User daily log"
+        }
+    ],
+    "user_456": [
+        {
+            "food": "Scrambled eggs and toast",
+            "steps": 6000,
+            "note": "User daily log"
+        }
+    ]
+}
