@@ -1,7 +1,8 @@
 from fastapi import FastAPI, File, UploadFile
-from backend.summarization import extract_text_from_pdf, summarize_medical_text
-from backend.health_tracking import log_health_data, get_past_logs
-import uvicorn
+from backend.summarization import extract_text_from_pdf,summarize_medical_text
+from backend.health_tracking import log_health_data, get_health_logs
+# from backend.recommendations import get_health_recommendations
+from backend.chatbot import chat_with_ai
 
 app = FastAPI()
 
@@ -11,14 +12,19 @@ async def upload_pdf(file: UploadFile = File(...)):
     summary = summarize_medical_text(text)
     return {"summary": summary}
 
-@app.post("/log/")
-async def log_data(user_id: str, food: str, steps: int):
-    log_health_data(user_id, food, steps, "User daily log")
-    return {"status": "Logged successfully"}
+@app.post("/log_health/")
+async def log_health_entry(data: dict):
+    return log_health_data(data)
 
-@app.get("/logs/")
-async def fetch_logs(user_id: str):
-    return get_past_logs(user_id)
+@app.get("/health_logs/")
+async def retrieve_health_logs():
+    return get_health_logs()
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+# @app.get("/recommendations/")
+# async def get_ai_recommendations():
+#     return get_health_recommendations()
+
+@app.post("/chat/")
+async def chat_with_ai_agent(message: str):
+    return chat_with_ai(message)
+

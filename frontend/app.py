@@ -1,26 +1,42 @@
 import streamlit as st
 import requests
 
-st.title("Medical History Tracker")
+st.title("AI-Powered Medical History & Health Tracker")
 
-uploaded_file = st.file_uploader("Upload Medical Report", type=["pdf"])
-if uploaded_file:
-    files = {"file": uploaded_file.getvalue()}
-    response = requests.post("http://127.0.0.1:8000/upload/", files=files)
-    if response.status_code == 200:
-        st.write("Summary:", response.json()["summary"])
+menu = ["Summarize Report", "Log Health Data", "View Recommendations", "Chat with AI"]
+choice = st.sidebar.selectbox("Select Feature", menu)
 
-st.header("Track Your Health")
-user_id = st.text_input("User ID")
-food = st.text_input("Food Intake")
-steps = st.number_input("Steps Taken", min_value=0)
-if st.button("Log Entry"):
-    data = {"user_id": user_id, "food": food, "steps": steps}
-    response = requests.post("http://127.0.0.1:8000/log/", json=data)
-    if response.status_code == 200:
-        st.success("Entry logged!")
+API_BASE = "http://localhost:8000"
 
-if st.button("View Past Logs"):
-    response = requests.get(f"http://127.0.0.1:8000/logs/?user_id={user_id}")
-    if response.status_code == 200:
-        st.write(response.json())
+if choice == "Summarize Report":
+    st.subheader("Upload Medical Report")
+    file = st.file_uploader("Choose a PDF file", type=["pdf"])
+    
+    if st.button("Summarize"):
+        with open("uploaded_report.pdf", "wb") as f:
+            f.write(file.read())
+
+        response = requests.post(f"{API_BASE}/summarize/", json={"file_path": "uploaded_report.pdf"})
+        st.success(response.json())
+
+elif choice == "Log Health Data":
+    st.subheader("Enter Health Data")
+    activity = st.text_input("Activity (e.g., Ate Salad, Walked 5km)")
+    date = st.date_input("Date")
+
+    if st.button("Log Entry"):
+        response = requests.post(f"{API_BASE}/log_health/", json={"date": str(date), "activity": activity})
+        st.success(response.json()["message"])
+
+elif choice == "View Recommendations":
+    st.subheader("AI-Powered Health Recommendations")
+    response = requests.get(f"{API_BASE}/recommendations/")
+    st.write(response.json()["recommendations"])
+
+elif choice == "Chat with AI":
+    st.subheader("Ask AI about your health")
+    user_input = st.text_input("Your question:")
+    
+    if st.button("Ask AI"):
+        response = requests.post(f"{API_BASE}/chat/", json={"message": user_input})
+        st.write(response.json()["response"])

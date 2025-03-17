@@ -2,29 +2,31 @@ import json
 import os
 
 # File to store health data (simulating a database)
-DATA_FILE = "health_logs.json"
+HEALTH_LOG_FILE = "health_logs.json"
 
 # Ensure the file exists
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "w") as f:
+if not os.path.exists(HEALTH_LOG_FILE):
+    with open(HEALTH_LOG_FILE, "w") as f:
         json.dump({}, f)
 
-def log_health_data(user_id: str, food: str, steps: int, note: str):
-    """Logs health data for a user."""
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
+def log_health_data(entry):
+    try:
+        with open(HEALTH_LOG_FILE, "r") as file:
+            logs = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        logs = []
 
-    if user_id not in data:
-        data[user_id] = []
+    logs.append(entry)
 
-    data[user_id].append({"food": food, "steps": steps, "note": note})
+    with open(HEALTH_LOG_FILE, "w") as file:
+        json.dump(logs, file, indent=4)
+    
+    return {"message": "Health data logged successfully!"}
 
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
-def get_past_logs(user_id: str):
-    """Retrieves past health logs for a user."""
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-
-    return data.get(user_id, [])
+def get_health_logs():
+    try:
+        with open(HEALTH_LOG_FILE, "r") as file:
+            logs = json.load(file)
+        return logs
+    except:
+        return {"error": "No health data found"}
